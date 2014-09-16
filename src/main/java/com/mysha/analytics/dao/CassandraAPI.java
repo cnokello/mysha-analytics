@@ -18,6 +18,7 @@ import com.datastax.driver.core.Session;
 import com.mysha.analytics.Init;
 import com.mysha.analytics.model.Disease;
 import com.mysha.analytics.model.Drug;
+import com.mysha.analytics.model.DrugClass;
 import com.mysha.analytics.model.DrugSideEffect;
 import com.mysha.analytics.utils.ConfigLoader;
 
@@ -44,6 +45,8 @@ public class CassandraAPI {
 
   private PreparedStatement DISEASE_PSTMT;
 
+  private PreparedStatement DRUG_CLASS_PSTMT;
+
   private BoundStatement boundStatement;
 
   public synchronized void connect() {
@@ -67,6 +70,9 @@ public class CassandraAPI {
 
         DISEASE_PSTMT = session
             .prepare("INSERT INTO my_health.diseases(id, class0, class1, class2, name, description) VALUES(?,?,?,?,?,?)");
+
+        DRUG_CLASS_PSTMT = session
+            .prepare("INSERT INTO my_health.drug_classes(id, class0, class1, class2, name, description) VALUES(?,?,?,?,?,?)");
 
         LOGGER.info("Connected to Cassandra cluster");
 
@@ -117,10 +123,14 @@ public class CassandraAPI {
       session
           .execute("CREATE TABLE IF NOT EXISTS my_health.diseases(id text PRIMARY KEY, class0 text, class1 text, class2 text, name text, description text)");
 
+      session
+          .execute("CREATE TABLE IF NOT EXISTS my_health.drug_classes(id text PRIMARY KEY, class0 text, class1 text, class2 text, name text, description text)");
+
     } catch (Exception e) {
       LOGGER.error(String.format("Message: %s\nTrace: %s\n\n", e.getMessage(),
           ExceptionUtils.getStackTrace(e)));
     }
+
     LOGGER.info("Database schema created");
   }
 
@@ -178,5 +188,24 @@ public class CassandraAPI {
         disease.getClass2(), disease.getName(), disease.getDescription()));
 
     LOGGER.info("Saved to DB ... " + disease.toString());
+  }
+
+  /**
+   * Persists drug class to DB
+   * 
+   * @param drugClass
+   * @throws Exception
+   */
+  public synchronized void persistDrugClass(final DrugClass drugClass) throws Exception {
+    connect();
+
+    LOGGER.info("Saving to DB ... " + drugClass.toString());
+
+    boundStatement = new BoundStatement(DRUG_CLASS_PSTMT);
+    session.execute(boundStatement.bind(drugClass.getId(), drugClass.getClass0(),
+        drugClass.getClass1(), drugClass.getClass2(), drugClass.getName(),
+        drugClass.getDescription()));
+
+    LOGGER.info("Saved to DB ... " + drugClass.toString());
   }
 }
