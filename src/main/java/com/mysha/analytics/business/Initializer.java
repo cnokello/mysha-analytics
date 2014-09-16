@@ -25,9 +25,6 @@ public class Initializer {
   ConfigLoader cfg;
 
   private @Autowired
-  DrugProcessor drugProcessor;
-
-  private @Autowired
   CassandraAPI cassandra;
 
   private JavaPairReceiverInputDStream<String, String> kafkaInputStream;
@@ -106,10 +103,6 @@ public class Initializer {
     }
 
     LOGGER.info("Resources released");
-  }
-
-  public DrugProcessor getDrugProcessor() {
-    return drugProcessor;
   }
 
   public void processDrug(final Drug drug) throws Exception {

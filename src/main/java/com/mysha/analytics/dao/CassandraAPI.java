@@ -16,6 +16,7 @@ import com.datastax.driver.core.Cluster;
 import com.datastax.driver.core.PreparedStatement;
 import com.datastax.driver.core.Session;
 import com.mysha.analytics.Init;
+import com.mysha.analytics.model.Disease;
 import com.mysha.analytics.model.Drug;
 import com.mysha.analytics.model.DrugSideEffect;
 import com.mysha.analytics.utils.ConfigLoader;
@@ -41,9 +42,11 @@ public class CassandraAPI {
 
   private PreparedStatement DRUG_SIDE_EFFECT_PSTMT;
 
+  private PreparedStatement DISEASE_PSTMT;
+
   private BoundStatement boundStatement;
 
-  public void connect() {
+  public synchronized void connect() {
     if (session == null) {
       try {
         LOGGER.info("Connecting to Cassandra cluster....");
@@ -61,6 +64,9 @@ public class CassandraAPI {
 
         DRUG_SIDE_EFFECT_PSTMT = session
             .prepare("INSERT INTO my_health.drug_side_effects(id, name, description) VALUES(?,?,?)");
+
+        DISEASE_PSTMT = session
+            .prepare("INSERT INTO my_health.diseases(id, class0, class1, class2, name, description) VALUES(?,?,?,?,?,?)");
 
         LOGGER.info("Connected to Cassandra cluster");
 
@@ -81,7 +87,7 @@ public class CassandraAPI {
 
   }
 
-  public void close() {
+  public synchronized void close() {
     if (cluster != null) {
       cluster.close();
     }
@@ -90,7 +96,7 @@ public class CassandraAPI {
   /**
    * Creates the database schema
    */
-  public void createSchema() {
+  public synchronized void createSchema() {
     connect();
 
     LOGGER.info("Creating database schema...");
@@ -108,6 +114,9 @@ public class CassandraAPI {
       session
           .execute("CREATE TABLE IF NOT EXISTS my_health.drug_side_effects(id text PRIMARY KEY, name text, description text)");
 
+      session
+          .execute("CREATE TABLE IF NOT EXISTS my_health.diseases(id text PRIMARY KEY, class0 text, class1 text, class2 text, name text, description text)");
+
     } catch (Exception e) {
       LOGGER.error(String.format("Message: %s\nTrace: %s\n\n", e.getMessage(),
           ExceptionUtils.getStackTrace(e)));
@@ -121,8 +130,10 @@ public class CassandraAPI {
    * @param drug
    * @throws Exception
    */
-  public void persistDrug(final Drug drug) throws Exception {
+  public synchronized void persistDrug(final Drug drug) throws Exception {
     connect();
+
+    LOGGER.info("Saving to DB ... " + drug.toString());
 
     boundStatement = new BoundStatement(DRUG_PSTMT);
     session.execute(boundStatement.bind(drug.getId(), drug.getName(), drug.getDescription(),
@@ -130,6 +141,7 @@ public class CassandraAPI {
         drug.getToxicity(), drug.getMetabolism(), drug.getAbsorption(), drug.getEliminationRoute(),
         drug.getHalfLife(), drug.getDistributionVolume()));
 
+    LOGGER.info("Saved to DB: " + drug.toString());
   }
 
   /**
@@ -138,7 +150,7 @@ public class CassandraAPI {
    * @param effect
    * @throws Exception
    */
-  public void persistDrugSideEffect(final DrugSideEffect effect) throws Exception {
+  public synchronized void persistDrugSideEffect(final DrugSideEffect effect) throws Exception {
     connect();
 
     LOGGER.info("Saving to DB ... " + effect.toString());
@@ -148,5 +160,23 @@ public class CassandraAPI {
 
     LOGGER.info("Saved to DB: " + effect.toString());
 
+  }
+
+  /**
+   * Persists disease into the database
+   * 
+   * @param disease
+   * @throws Exception
+   */
+  public synchronized void persistDisease(final Disease disease) throws Exception {
+    connect();
+
+    LOGGER.info("Saving to DB ... " + disease.toString());
+
+    boundStatement = new BoundStatement(DISEASE_PSTMT);
+    session.execute(boundStatement.bind(disease.getId(), disease.getClass0(), disease.getClass1(),
+        disease.getClass2(), disease.getName(), disease.getDescription()));
+
+    LOGGER.info("Saved to DB ... " + disease.toString());
   }
 }

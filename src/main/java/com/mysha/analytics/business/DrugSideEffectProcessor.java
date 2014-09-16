@@ -7,14 +7,12 @@ import kafka.consumer.KafkaStream;
 
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
 
 import com.google.gson.Gson;
 import com.mysha.analytics.dao.CassandraAPI;
 import com.mysha.analytics.model.DrugSideEffect;
 import com.mysha.analytics.utils.ConfigLoader;
 
-@Service(value = "drugSideEffectProcessor")
 public class DrugSideEffectProcessor implements Callable<Long> {
 
   private Logger LOGGER = Logger.getLogger(DrugSideEffectProcessor.class);

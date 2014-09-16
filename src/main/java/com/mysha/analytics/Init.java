@@ -4,6 +4,7 @@ import org.apache.log4j.Logger;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 
+import com.mysha.analytics.transformer.DiseaseTransformer;
 import com.mysha.analytics.transformer.DrugSideEffectTransformer;
 import com.mysha.analytics.transformer.DrugTransformer;
 
@@ -27,9 +28,12 @@ public class Init {
     final DrugTransformer drugTransformer = (DrugTransformer) ctx.getBean("drugTransformer");
     final DrugSideEffectTransformer sideEffectTransformer = (DrugSideEffectTransformer) ctx
         .getBean("drugSideEffectTransformer");
+    final DiseaseTransformer diseaseTransformer = (DiseaseTransformer) ctx
+        .getBean("diseaseTransformer");
 
     drugTransformer.transform();
     sideEffectTransformer.transform();
+    diseaseTransformer.transform();
 
   }
 }
