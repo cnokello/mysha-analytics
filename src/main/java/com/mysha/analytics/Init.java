@@ -10,7 +10,7 @@ import com.mysha.analytics.transformer.DrugSideEffectTransformer;
 import com.mysha.analytics.transformer.DrugTransformer;
 
 /**
- * This class demonstrates streaming from Kafka
+ * This class is the entry point for streams processing
  * 
  * @author nelson.okello
  * 
@@ -26,14 +26,23 @@ public class Init {
   }
 
   public static void main(String[] args) throws Exception {
+
+    // Drug streams process
     final DrugTransformer drugTransformer = (DrugTransformer) ctx.getBean("drugTransformer");
+
+    // Drug side effects streams processing
     final DrugSideEffectTransformer sideEffectTransformer = (DrugSideEffectTransformer) ctx
         .getBean("drugSideEffectTransformer");
+
+    // Disease streams processing
     final DiseaseTransformer diseaseTransformer = (DiseaseTransformer) ctx
         .getBean("diseaseTransformer");
+
+    // Drug classes streams processing
     final DrugClassTransformer drugClassTransformer = (DrugClassTransformer) ctx
         .getBean("drugClassTransformer");
 
+    // Run the streams
     drugTransformer.transform();
     sideEffectTransformer.transform();
     diseaseTransformer.transform();

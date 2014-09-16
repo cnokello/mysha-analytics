@@ -19,6 +19,12 @@ import com.mysha.analytics.dao.CassandraAPI;
 import com.mysha.analytics.utils.ConfigLoader;
 import com.mysha.analytics.utils.KafkaConsumerCfg;
 
+/**
+ * Processes drug side effects
+ * 
+ * @author nelson.okello
+ * 
+ */
 @Service(value = "drugSideEffectTransformer")
 public class DrugSideEffectTransformer {
 

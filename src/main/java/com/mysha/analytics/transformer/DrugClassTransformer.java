@@ -19,6 +19,12 @@ import com.mysha.analytics.dao.CassandraAPI;
 import com.mysha.analytics.utils.ConfigLoader;
 import com.mysha.analytics.utils.KafkaConsumerCfg;
 
+/**
+ * Processes drugs classes
+ * 
+ * @author nelson.okello
+ * 
+ */
 @Service(value = "drugClassTransformer")
 public class DrugClassTransformer {
 
