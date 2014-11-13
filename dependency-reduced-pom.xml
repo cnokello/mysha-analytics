@@ -14,7 +14,7 @@
         <configuration>
           <archive>
             <manifest>
-              <mainClass>your.main.Class</mainClass>
+              <mainClass>com.mysha.analytics.KafkaWordCount</mainClass>
               <addClasspath>true</addClasspath>
               <classpathPrefix>lib/</classpathPrefix>
             </manifest>
@@ -115,11 +115,14 @@
     </dependency>
   </dependencies>
   <properties>
+    <mahout.version>0.9</mahout.version>
+    <lucene.version>4.10.0</lucene.version>
     <junit.version>3.8.1</junit.version>
     <jpa.version>2.1.0</jpa.version>
     <gson.version>2.2.4</gson.version>
     <springframework.version>4.0.6.RELEASE</springframework.version>
     <scala.binary.version>2.10</scala.binary.version>
+    <hadoop-client.version>2.3.0-cdh5.0.1</hadoop-client.version>
     <kafka.version>0.8.1.1</kafka.version>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <lz4.version>1.2.0</lz4.version>

@@ -14,22 +14,15 @@ import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import com.mysha.analytics.business.DrugProcessor;
+import com.mysha.analytics.business.HealthFacilityProcessor;
 import com.mysha.analytics.dao.CassandraAPI;
 import com.mysha.analytics.utils.ConfigLoader;
 import com.mysha.analytics.utils.KafkaConsumerCfg;
 
-/**
- * Processes drugs
- * 
- * @author nelson.okello
- * 
- */
-@Service(value = "drugTransformer")
-public class DrugTransformer {
+@Service(value = "healthFacilityTransformer")
+public class HealthFacilityTransformer {
 
-  private static final Logger LOGGER = Logger.getLogger(DrugTransformer.class);
-
+  private static final Logger LOGGER = Logger.getLogger(HealthFacilityTransformer.class);
   private @Autowired
   ConfigLoader cfg;
 
@@ -53,7 +46,7 @@ public class DrugTransformer {
       try {
         LOGGER.info("Connecting to Kafka...");
 
-        topic = cfg.getEnv().getProperty("kafka.topics.drugs");
+        topic = cfg.getEnv().getProperty("kafka.topics.health.facilities");
         consumer = kafkaCfg.init(topic);
 
         LOGGER.info("Connected to Kafka topic " + topic);
@@ -68,7 +61,6 @@ public class DrugTransformer {
   public void transform() {
     initKafkaConsumer();
 
-    // Perform initialization
     try {
       int numThreads = new Integer(cfg.getEnv().getProperty("kafka.threads"));
       Map<String, Integer> topicCountMap = new HashMap<String, Integer>();
@@ -80,15 +72,15 @@ public class DrugTransformer {
       // Execute all threads
       executor = Executors.newFixedThreadPool(numThreads);
 
-      // Consume the messages
       int threadNum = 0;
       for (final KafkaStream stream : streams) {
         LOGGER.info("#### A new stream message....");
-        executor.submit(new DrugProcessor(stream, threadNum, cassandra));
+        executor.submit(new HealthFacilityProcessor(stream, threadNum, cassandra));
         threadNum++;
       }
+
     } catch (Exception e) {
-      LOGGER.error(String.format("Message: %s\nTrace: %s\n", e.getMessage(),
+      LOGGER.error(String.format("Message: %s\nTrace: %s\n\n", e.getMessage(),
           ExceptionUtils.getStackTrace(e)));
     }
 

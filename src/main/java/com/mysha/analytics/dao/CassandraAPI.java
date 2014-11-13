@@ -16,10 +16,13 @@ import com.datastax.driver.core.Cluster;
 import com.datastax.driver.core.PreparedStatement;
 import com.datastax.driver.core.Session;
 import com.mysha.analytics.Init;
+import com.mysha.analytics.model.ArticleLink;
 import com.mysha.analytics.model.Disease;
 import com.mysha.analytics.model.Drug;
 import com.mysha.analytics.model.DrugClass;
 import com.mysha.analytics.model.DrugSideEffect;
+import com.mysha.analytics.model.HealthFacility;
+import com.mysha.analytics.model.HealthProfessional;
 import com.mysha.analytics.utils.ConfigLoader;
 
 @Service(value = "cassandraAPI")
@@ -47,6 +50,12 @@ public class CassandraAPI {
 
   private PreparedStatement DRUG_CLASS_PSTMT;
 
+  private PreparedStatement HEALTH_PROFESSIONAL_PSTMT;
+
+  private PreparedStatement HEALTH_FACILITY_PSTMT;
+
+  private PreparedStatement ARTICLE_LINK_PSTMT;
+
   private BoundStatement boundStatement;
 
   public synchronized void connect() {
@@ -73,6 +82,17 @@ public class CassandraAPI {
 
         DRUG_CLASS_PSTMT = session
             .prepare("INSERT INTO my_health.drug_classes(id, class0, class1, class2, name, description) VALUES(?,?,?,?,?,?)");
+
+        HEALTH_PROFESSIONAL_PSTMT = session
+            .prepare("INSERT INTO my_health.health_professional(id, name, qualification, specialty, subSpecialty, "
+                + "address, profession, localForeign, type) " + "VALUES(?,?,?,?,?,?,?,?,?)");
+
+        HEALTH_FACILITY_PSTMT = session
+            .prepare("INSERT INTO my_health.health_facility(id, name, regNumber, address, facilityType, bedCapacity, type) "
+                + "VALUES(?,?,?,?,?,?,?)");
+
+        ARTICLE_LINK_PSTMT = session
+            .prepare("INSERT INTO my_health.article_link(id, title, uri, source, type) VALUES(?,?,?,?,?)");
 
         LOGGER.info("Connected to Cassandra cluster");
 
@@ -117,14 +137,28 @@ public class CassandraAPI {
           + "absorption text, " + "eliminationRoute text, " + "halfLife text, "
           + "distributionVolume text" + ");");
 
-      session
-          .execute("CREATE TABLE IF NOT EXISTS my_health.drug_side_effects(id text PRIMARY KEY, name text, description text)");
+      session.execute("CREATE TABLE IF NOT EXISTS my_health.drug_side_effects("
+          + "id text PRIMARY KEY, name text, description text)");
 
       session
-          .execute("CREATE TABLE IF NOT EXISTS my_health.diseases(id text PRIMARY KEY, class0 text, class1 text, class2 text, name text, description text)");
+          .execute("CREATE TABLE IF NOT EXISTS my_health.diseases("
+              + "id text PRIMARY KEY, class0 text, class1 text, class2 text, name text, description text)");
 
       session
-          .execute("CREATE TABLE IF NOT EXISTS my_health.drug_classes(id text PRIMARY KEY, class0 text, class1 text, class2 text, name text, description text)");
+          .execute("CREATE TABLE IF NOT EXISTS my_health.drug_classes("
+              + "id text PRIMARY KEY, class0 text, class1 text, class2 text, name text, description text)");
+
+      session
+          .execute("CREATE TABLE IF NOT EXISTS my_health.health_professional("
+              + "id text PRIMARY KEY, name text, qualification text, specialty text, subSpecialty text, "
+              + "address text, profession text, localForeign text, type text)");
+
+      session
+          .execute("CREATE TABLE IF NOT EXISTS my_health.health_facility("
+              + "id text PRIMARY KEY, name text, regNumber text, address text, facilityType text, bedCapacity text, type text)");
+
+      session.execute("CREATE TABLE IF NOT EXISTS my_health.article_link("
+          + "id text PRIMARY KEY, title text, uri text, source text, type text)");
 
     } catch (Exception e) {
       LOGGER.error(String.format("Message: %s\nTrace: %s\n\n", e.getMessage(),
@@ -207,5 +241,42 @@ public class CassandraAPI {
         drugClass.getDescription()));
 
     LOGGER.info("Saved to DB ... " + drugClass.toString());
+  }
+
+  public synchronized void persistHealthProfessional(final HealthProfessional hf) throws Exception {
+    connect();
+
+    LOGGER.info("Saving to DB..." + hf.toString());
+
+    boundStatement = new BoundStatement(HEALTH_PROFESSIONAL_PSTMT);
+    session.execute(boundStatement.bind(hf.getId(), hf.getName(), hf.getQualification(),
+        hf.getSpecialty(), hf.getSubSpecialty(), hf.getAddress(), hf.getProfession(),
+        hf.getLocalForeign(), hf.getType()));
+
+    LOGGER.info("Saved to DB: " + hf.toString());
+  }
+
+  public synchronized void persistHealthFacility(final HealthFacility hf) throws Exception {
+    connect();
+
+    LOGGER.info("Saving to DB..." + hf.toString());
+
+    boundStatement = new BoundStatement(HEALTH_FACILITY_PSTMT);
+    session.execute(boundStatement.bind(hf.getId(), hf.getName(), hf.getRegNumber(),
+        hf.getAddress(), hf.getFacilityType(), hf.getBedCapacity(), hf.getType()));
+
+    LOGGER.info("Saved to DB: " + hf.toString());
+  }
+
+  public synchronized void persistArticleLink(final ArticleLink article) throws Exception {
+    connect();
+
+    LOGGER.info("Saving to DB... " + article.toString());
+
+    boundStatement = new BoundStatement(ARTICLE_LINK_PSTMT);
+    session.execute(boundStatement.bind(article.getId(), article.getTitle(), article.getUri(),
+        article.getSource(), article.getType()));
+
+    LOGGER.info("Saved to DB: " + article.toString());
   }
 }

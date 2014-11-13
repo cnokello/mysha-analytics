@@ -22,6 +22,9 @@
     <jackson.version>1.9.13</jackson.version>
     <jpa.version>2.1.0</jpa.version>
     <spark-cassandra-connector.version>1.0.0-rc4</spark-cassandra-connector.version>
+    <lucene.version>4.10.0</lucene.version>
+    <hadoop-client.version>2.3.0-cdh5.0.1</hadoop-client.version>
+    <mahout.version>0.9</mahout.version>
   </properties>
   
   <dependencies>
@@ -31,6 +34,62 @@
       <version>${junit.version}</version>
       <scope>test</scope>
     </dependency>
+    
+    <!-- Hadoop -->
+    <dependency>
+      <groupId>org.apache.hadoop</groupId>
+      <artifactId>hadoop-client</artifactId>
+      <version>${hadoop-client.version}</version>
+    </dependency>
+    
+    <!-- Lucene -->
+    <dependency>
+        <groupId>org.apache.lucene</groupId>
+        <artifactId>lucene-core</artifactId>
+        <version>${lucene.version}</version>
+    </dependency>
+    <dependency>
+        <groupId>org.apache.lucene</groupId>
+        <artifactId>lucene-analyzers-common</artifactId>
+        <version>${lucene.version}</version>
+    </dependency>
+    <dependency>
+        <groupId>org.apache.lucene</groupId>
+        <artifactId>lucene-queryparser</artifactId>
+        <version>${lucene.version}</version>
+    </dependency>
+    <dependency>
+        <groupId>org.apache.lucene</groupId>
+        <artifactId>lucene-queries</artifactId>
+        <version>${lucene.version}</version>
+    </dependency>
+    
+    <!-- Mahout -->
+    <dependency>
+        <groupId>org.apache.mahout</groupId>
+        <artifactId>mahout-core</artifactId>
+        <version>${mahout.version}</version>
+    </dependency>
+        <dependency>
+        <groupId>org.apache.mahout</groupId>
+        <artifactId>mahout-math</artifactId>
+        <version>${mahout.version}</version>
+    </dependency>
+    <dependency>
+        <groupId>org.apache.mahout</groupId>
+        <artifactId>mahout-collections</artifactId>
+        <version>1.0</version>
+    </dependency>
+    <dependency>
+        <groupId>org.apache.mahout</groupId>
+        <artifactId>mahout-utils</artifactId>
+        <version>0.5</version>
+    </dependency>
+    
+    
+    
+    
+    
     
    <!-- Kafka -->
     <dependency>
@@ -162,7 +221,7 @@
               <configuration>
                   <archive>
                       <manifest>
-                          <mainClass>your.main.Class</mainClass>
+                          <mainClass>com.mysha.analytics.KafkaWordCount</mainClass>
                           <addClasspath>true</addClasspath>
                           <classpathPrefix>lib/</classpathPrefix>
                       </manifest>

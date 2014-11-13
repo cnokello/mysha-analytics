@@ -14,8 +14,9 @@ import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import com.mysha.analytics.business.DrugProcessor;
+import com.mysha.analytics.business.ArticleLinkProcessor;
 import com.mysha.analytics.dao.CassandraAPI;
+import com.mysha.analytics.ml.BayesClassifier;
 import com.mysha.analytics.utils.ConfigLoader;
 import com.mysha.analytics.utils.KafkaConsumerCfg;
 
@@ -25,10 +26,10 @@ import com.mysha.analytics.utils.KafkaConsumerCfg;
  * @author nelson.okello
  * 
  */
-@Service(value = "drugTransformer")
-public class DrugTransformer {
+@Service(value = "articleLinkTransformer")
+public class ArticleLinkTransformer {
 
-  private static final Logger LOGGER = Logger.getLogger(DrugTransformer.class);
+  private static final Logger LOGGER = Logger.getLogger(ArticleLinkTransformer.class);
 
   private @Autowired
   ConfigLoader cfg;
@@ -38,6 +39,9 @@ public class DrugTransformer {
 
   private @Autowired
   CassandraAPI cassandra;
+
+  private @Autowired
+  BayesClassifier classifier;
 
   private ConsumerConnector consumer;
 
@@ -53,7 +57,7 @@ public class DrugTransformer {
       try {
         LOGGER.info("Connecting to Kafka...");
 
-        topic = cfg.getEnv().getProperty("kafka.topics.drugs");
+        topic = cfg.getEnv().getProperty("kafka.topics.article.link");
         consumer = kafkaCfg.init(topic);
 
         LOGGER.info("Connected to Kafka topic " + topic);
@@ -84,9 +88,10 @@ public class DrugTransformer {
       int threadNum = 0;
       for (final KafkaStream stream : streams) {
         LOGGER.info("#### A new stream message....");
-        executor.submit(new DrugProcessor(stream, threadNum, cassandra));
+        executor.submit(new ArticleLinkProcessor(stream, threadNum, cassandra, classifier));
         threadNum++;
       }
+
     } catch (Exception e) {
       LOGGER.error(String.format("Message: %s\nTrace: %s\n", e.getMessage(),
           ExceptionUtils.getStackTrace(e)));
